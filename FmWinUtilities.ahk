@@ -1,7 +1,7 @@
 ﻿; #################################################################
 ; AUTHOR: Robert Koszegi
 ; DATE: 2025-08-10
-; VERSION: 1.0
+; VERSION: 1.1
 ; REQUIREMENTS: Installation of AutoHotkey v2.0
 ; 
 ; #################################################################
@@ -502,6 +502,41 @@ SetTitleMatchMode "Regex"
 
 	}
 
+	; Duplicate Row Down
+	!+Down::{
+
+		KeyWait("Alt")
+		SaveUserClipboard
+
+		SelectRow
+		Copy
+		SendInput "{End}"
+		SendInput "{Enter}"
+		Paste
+
+		RestoreUserClipboard
+
+	}
+	
+
+	; Duplicate Row Up
+	!+Up::{
+
+		KeyWait("Alt")
+		SaveUserClipboard
+
+		SelectRow
+		Copy
+		SendInput "{Home}"
+		SendInput "{Enter}"
+		SendInput "{Up}"
+		Paste
+
+		RestoreUserClipboard
+
+	}
+
+	;  = Special Characters =
 	; Pilcrow: Alt + 7
 	; (this is the same shortcut as it is natively on Mac)
 	!7::{

@@ -51,10 +51,14 @@ AutoHotkey v2.0
 `Alt + R`: Remove selected expression<br>
 
 ### Calculation Window
+#### Editing Functions
 `Ctrl + /`: Comment out current row<br>
 `Ctrl + Alt + /`: Comment out entire calculation with number added to prevent the calc window from turning it into a concatenated string<br>
 `Alt + Down`: Switch row down<br>
 `Alt + Up`: Switch row up<br>
+`Alt + Shift + Down`: Duplicate row down<br>
+`Alt + Shift + Up`: Dublicate row up<br>
+#### Special Characters
 `Alt + 7`: Pilcrow character (same as on Mac and it's convenient with "\&" character)<br>
 `Alt + =`: Not equal sign<br>
 `Alt + ,`: Less than or equal to<br>
@@ -74,6 +78,12 @@ AutoHotkey v2.0
 
 ### Layout Manager
 `E`: Open selected layout (E for enter)<br>
+<br>
+
+## History
+1.0 - 2025-08-12 - Inital feature set<br>
+1.1 - 2025-08-14 - Added: Calculation window - row duplication 
+
 
 
 
