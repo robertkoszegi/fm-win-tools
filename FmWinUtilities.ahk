@@ -163,7 +163,7 @@ SetTitleMatchMode "Regex"
 	}
 
 	; Slide Control Setup
-	; Alt + Win + C (with a slide control selcted)
+	; Alt + Shift + C (with a slide control selcted)
 	!+c::
 	{
 

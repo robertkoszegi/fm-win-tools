@@ -34,7 +34,7 @@ AutoHotkey v2.0
 `Ctrl + Alt + I`: New inspector window<br>
 `Ctrl + Alt + Shift + C`: Conditional formatting dialog (select object first)<br>
 `Ctrl + Alt + Shift + S`: Show sample data<br>
-`Alt + Win + C`: Slide control setup dialog (select object first) \[Kind of redundant, but why not?]<br>
+`Alt + Shift + C`: Slide control setup dialog (select object first) \[Kind of redundant, but why not?]<br>
 
 #### General:
 `Ctrl + Alt + Shift + O`: Open recent<br>
