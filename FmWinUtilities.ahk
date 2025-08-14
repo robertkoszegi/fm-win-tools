@@ -506,6 +506,7 @@ SetTitleMatchMode "Regex"
 	!+Down::{
 
 		KeyWait("Alt")
+		KeyWait("Shift")
 		SaveUserClipboard
 
 		SelectRow
@@ -523,6 +524,7 @@ SetTitleMatchMode "Regex"
 	!+Up::{
 
 		KeyWait("Alt")
+		KeyWait("Shift")
 		SaveUserClipboard
 
 		SelectRow
