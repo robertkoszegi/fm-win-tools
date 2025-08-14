@@ -1,7 +1,7 @@
 ﻿; #################################################################
 ; AUTHOR: Robert Koszegi
 ; DATE: 2025-08-10
-; VERSION: 1.1
+; VERSION: 1.2
 ; REQUIREMENTS: Installation of AutoHotkey v2.0
 ; 
 ; #################################################################
@@ -278,7 +278,7 @@ SetTitleMatchMode "Regex"
 ;  					CALCULATION WINDOW
 ; ==========================================================
 ; (Specyfy Calculation[...], Edit Expression)
-#HotIf WinActive("Edit Expression") || WinActive("^Specify Calculation.*")
+#HotIf WinActive("Edit Expression") || WinActive("^Specify Calculation.*") || WinActive("Edit Custom Function")
     ; Hotkeys that only work in "Edit Expression" of Specify Calculation window
 
 	; == TEXT EDITING SHORTCUTS ==
