@@ -1,8 +1,10 @@
 ﻿; #################################################################
 ; AUTHOR: Robert Koszegi
-; DATE: 2025-08-10
+; DATE: 2025-08-14
 ; VERSION: 1.2
-; REQUIREMENTS: Installation of AutoHotkey v2.0
+; REQUIREMENTS: 
+;  - Installation of AutoHotkey v2.0
+;  - FileMaker 21 Windows (but majority of the features work on any recent FM versions for Windows)
 ; 
 ; #################################################################
 
