@@ -58,6 +58,8 @@ AutoHotkey v2.0
 `Alt + Up`: Switch row up<br>
 `Alt + Shift + Down`: Duplicate row down<br>
 `Alt + Shift + Up`: Dublicate row up<br>
+`Double click`: When double clicking a word, trailing spaces are removed from selection<br>
+
 #### Special Characters
 `Alt + 7`: Pilcrow character (same as on Mac and it's convenient with "\&" character)<br>
 `Alt + =`: Not equal sign<br>
@@ -82,7 +84,14 @@ AutoHotkey v2.0
 
 ## History
 1.0 - 2025-08-12 - Inital feature set<br>
-1.1 - 2025-08-14 - Added: Calculation window - row duplication 
+
+1.1 - 2025-08-14<br>
+-Calculation window - row duplication added<br>
+-Enableed calculation window features in Edit Custom Function window<br>
+
+1.2 - 2025-08-15<br>
+-added removal of trailing spaces from highlight when double clicking a word
+
 
 
 

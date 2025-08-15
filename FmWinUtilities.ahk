@@ -17,6 +17,8 @@
 ; Allow Window name matching with regex
 SetTitleMatchMode "Regex"
 
+; InstallMouseHook
+
 ; Reload this script: Ctrl + Alt + R
 #HotIf WinActive("ahk_exe Code.exe")
 
@@ -27,9 +29,15 @@ SetTitleMatchMode "Regex"
 ; Test shortcut: Ctrl + Alt + F
 ^!f:: {
 
-	; Test operations here
+	; static lastClick := 0
+	; if (A_TickCount - lastClick < 500) {  ; 300 ms threshold
+	; 	MsgBox "Double-click detected!"
+	; }
+	; lastClick := A_TickCount
 
 }
+
+
 
 ; View clipboard: Crl + Shift + ?
 ^+/::{
@@ -40,14 +48,42 @@ SetTitleMatchMode "Regex"
 ; #################################################################
 
 
-
 ; #################################################################
 ; 							## FM UTILITIES ##
 ; #################################################################
 ; ==========================================================
+; 					GLOBAL
+; ==========================================================
+; ~LButton:: {
+
+; 	static lastClick := 0
+; 	if (A_TickCount - lastClick < 300) {  ; 300 ms threshold
+; 		; MsgBox "Double-click detected!"
+; 		SaveUserClipboard
+		
+; 		Copy
+; 		ClipWait
+; 		wordSelected := A_Clipboard
+; 		if(RegExMatch())
+
+
+; 		RestoreUserClipboard
+
+; 	}
+; 	lastClick := A_TickCount
+
+; }
+
+
+
+
+; ==========================================================
 ; 					DOCUMENT WINDOWS
 ; ==========================================================
 #HotIf WinActive("ahk_class FMPRO\d\d.0APP$")
+
+
+
 
 	; Check for Layout Mode
 	IsLayoutMode()
@@ -355,7 +391,7 @@ SetTitleMatchMode "Regex"
 		return lineCount
 	}
 
-
+		
 	; SHORTCUTS
 	; Comment out entire calculation: Ctrl + Alt + /
 	^!/::{
@@ -546,7 +582,7 @@ SetTitleMatchMode "Regex"
 	}	
 	
 	; Not Equal: Alt + =
-	!=::{
+	 !=::{
 		SendInput "≠"
 	}
 
@@ -569,6 +605,34 @@ SetTitleMatchMode "Regex"
 		SendInput "{Tab}"
 	}
 	; ------------------------------------
+	
+	; Detect a left-button double-click and trim trailing whitespace from the selection.
+		~LButton:: {  ; fire on every left click, let it pass through
+    if (A_PriorHotkey = "~LButton" && A_TimeSincePriorHotkey < 300) {
+        TrimSelectionTrailingSpaces()
+    }
+}
+
+	TrimSelectionTrailingSpaces() {
+		SaveUserClipboard
+		try {
+			Copy
+			ClipWait
+			sel := A_Clipboard
+
+			; Count trailing horizontal whitespace (spaces/tabs) at end of selection.
+			; Use " +$" if you only want literal spaces.
+			if RegExMatch(sel, "\h+$", &m) {   ; \h = horizontal whitespace (space or tab)
+				n := StrLen(m[0])
+				Loop n
+					Send "+{Left}"            ; shrink selection from right by n chars
+			}
+
+		} finally {
+			RestoreUserClipboard
+		}
+	}
+
 
 #HotIf
 ; #################################################################
