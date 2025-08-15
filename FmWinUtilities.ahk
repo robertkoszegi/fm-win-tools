@@ -42,7 +42,8 @@ SetTitleMatchMode "Regex"
 ; View clipboard: Crl + Shift + ?
 ^+/::{
 
-	MsgBox A_Clipboard
+	; MsgBox A_Clipboard
+	MsgBox A_TimeSincePriorHotkey
 
 }
 ; #################################################################
@@ -607,15 +608,20 @@ SetTitleMatchMode "Regex"
 	; ------------------------------------
 	
 	; Detect a left-button double-click and trim trailing whitespace from the selection.
-		~LButton:: {  ; fire on every left click, let it pass through
-    if (A_PriorHotkey = "~LButton" && A_TimeSincePriorHotkey < 300) {
-        TrimSelectionTrailingSpaces()
-    }
-}
+	~LButton:: {  ; fire on every left click, let it pass through
+
+		if (A_PriorHotkey = "~LButton" && A_TimeSincePriorHotkey < 400) {
+			TrimSelectionTrailingSpaces()			
+		}
+
+	}
 
 	TrimSelectionTrailingSpaces() {
+
 		SaveUserClipboard
+		
 		try {
+
 			Copy
 			ClipWait
 			sel := A_Clipboard
@@ -629,8 +635,11 @@ SetTitleMatchMode "Regex"
 			}
 
 		} finally {
+
 			RestoreUserClipboard
+
 		}
+
 	}
 
 
