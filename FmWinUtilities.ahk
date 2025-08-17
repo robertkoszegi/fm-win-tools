@@ -52,32 +52,6 @@ SetTitleMatchMode "Regex"
 ; 							## FM UTILITIES ##
 ; #################################################################
 ; ==========================================================
-; 					GLOBAL
-; ==========================================================
-; ~LButton:: {
-
-; 	static lastClick := 0
-; 	if (A_TickCount - lastClick < 300) {  ; 300 ms threshold
-; 		; MsgBox "Double-click detected!"
-; 		SaveUserClipboard
-		
-; 		Copy
-; 		ClipWait
-; 		wordSelected := A_Clipboard
-; 		if(RegExMatch())
-
-
-; 		RestoreUserClipboard
-
-; 	}
-; 	lastClick := A_TickCount
-
-; }
-
-
-
-
-; ==========================================================
 ; 					DOCUMENT WINDOWS
 ; ==========================================================
 #HotIf WinActive("ahk_class FMPRO\d\d.0APP$")
