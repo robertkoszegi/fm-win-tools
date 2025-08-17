@@ -20,7 +20,8 @@ More complex features and function templates to come.
 * *One shortcut to toggle between Layout and Browse modes*
 
 ## Requirements
-AutoHotkey v2.0 
+AutoHotkey v2.0 <br>
+Unless otherwise noted below, FileMaker 16+ for Windows should be compatible
 
 
 ## Shortcuts
