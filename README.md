@@ -1,4 +1,4 @@
-# FM Win Tools
+# FM Win Tools v2.0
 
 An AutoHotkey project to implement a comprehensive set of convenient keyboard shortcuts and functionality fixes for the FileMaker development environment on Windows.<br>
 <br>
@@ -18,11 +18,16 @@ More complex features and function templates to come.
 * *Intuitively use arrows to step through your script in the Debugger*
 * *One shortcut to open Debugger from either window (Document or Script Workspace)*
 * *One shortcut to toggle between Layout and Browse modes*
+* Dedicated button panel for items under **View > Show** menu in **layout mode**
 
 ## Requirements
 AutoHotkey v2.0 <br>
 Unless otherwise noted below, FileMaker 16+ for Windows should be compatible
 
+## Release Notes
+### Badge Panel
+* `Ctrl + Alt + Shift + S` shortcut updated to displaying a panel replresenting options in **View > Show** menu in **layout mode**
+* Known issue: Badge Panel only closes automatically if using the native shortcut for browse mode (Ctrl + B) or custom shortcut defined here (Ctrl + Alt + A). If using other methods to switch to browse mode, the pane needs to be closed manually. 
 
 ## Shortcuts
 
@@ -34,7 +39,7 @@ Unless otherwise noted below, FileMaker 16+ for Windows should be compatible
 #### Layout Mode:
 `Ctrl + Alt + I`: New inspector window<br>
 `Ctrl + Alt + Shift + C`: Conditional formatting dialog (select object first)<br>
-`Ctrl + Alt + Shift + S`: Show sample data<br>
+`Ctrl + Alt + Shift + S`: Show Badges Panel<br>
 `Alt + Shift + C`: Slide control setup dialog (select object first) \[Kind of redundant, but why not?]<br>
 
 #### General:
@@ -84,14 +89,18 @@ Unless otherwise noted below, FileMaker 16+ for Windows should be compatible
 <br>
 
 ## History
-1.0 - 2025-08-12 - Inital feature set<br>
+**2.0 - 2025-08-17**<br>
+-Added Show Badges panel<br>
 
-1.1 - 2025-08-14<br>
+**1.2 - 2025-08-15**<br>
+-Added removal of trailing spaces from highlight when double clicking a word
+
+**1.1 - 2025-08-14**<br>
 -Calculation window - row duplication added<br>
 -Enableed calculation window features in Edit Custom Function window<br>
 
-1.2 - 2025-08-15<br>
--added removal of trailing spaces from highlight when double clicking a word
+**1.0 - 2025-08-12**<br>
+-Inital feature set<br>
 
 
 

@@ -1,7 +1,7 @@
 ﻿; #################################################################
 ; AUTHOR: Robert Koszegi
 ; DATE: 2025-08-14
-; VERSION: 1.2
+; VERSION: 2.0
 ; REQUIREMENTS: 
 ;  - Installation of AutoHotkey v2.0
 ;  - FileMaker 21 Windows (but majority of the features work on any recent FM versions for Windows)
@@ -37,6 +37,10 @@ SetTitleMatchMode "Regex"
 	; }
 	; lastClick := A_TickCount
 
+	global
+	MsgBox gShowPanelVisible
+	; MsgBox IsObject(gShowPanel)
+
 }
 
 
@@ -45,7 +49,7 @@ SetTitleMatchMode "Regex"
 ^+/::{
 
 	; MsgBox A_Clipboard
-	MsgBox A_TimeSincePriorHotkey
+	MsgBox gShowPanelTitle
 
 }
 ; #################################################################
@@ -58,8 +62,7 @@ SetTitleMatchMode "Regex"
 ; 					DOCUMENT WINDOWS
 ; ==========================================================
 #HotIf WinActive("ahk_class FMPRO\d\d.0APP$")
-
-
+	global gShowPanelTitle := "Show Badges"
 
 
 	; Check for Layout Mode
@@ -117,7 +120,12 @@ SetTitleMatchMode "Regex"
 	^!a::{
 
 		if( IsLayoutMode() ){
+			
+			if(WinExist(gShowPanelTitle)) {
 
+				WinClose(gShowPanelTitle)
+				
+			}
 			SendInput "^b"
 
 		} else {
@@ -126,6 +134,23 @@ SetTitleMatchMode "Regex"
 
 		}
 
+	}
+
+	; Switch to Browse Mode: Ctrl + B
+	; Closing the Show Badges panes automatically when using the native shortcut 
+	^b::{
+
+		if( IsLayoutMode() ){
+			
+			; Show Badges panes if open
+			if(WinExist(gShowPanelTitle)) {
+
+				WinClose(gShowPanelTitle)
+				
+			}
+			SendInput "^b"
+
+		}
 	}
 
 
@@ -188,19 +213,160 @@ SetTitleMatchMode "Regex"
 
 	}
 
-	; Show Sample Data
-	; Ctrl + Alt + Shift + S
-	^!+s::
-	{
+
+	; ===== Show Badges panel ============================
+	; Ctrl + Shift + Alt + S
+	global gShowPanel := ""
+	global gShowPanelVisible := ""
+
+	^+!s:: { ; Ctrl+Shift+Alt+S
 
 		if( IsLayoutMode() ){
-
-			SendInput "!vss"
+				
+			global gShowPanel
+			global gShowPanelVisible
 			
+			if !IsObject(gShowPanel) {
+
+				; Build gui object if doesn't exist
+				gShowPanel := BuildPanel()
+
+			} else if (WinExist(gShowPanelTitle) AND !WinActive(gShowPanelTitle)) {
+
+				; Make window active if not (skip toggling)
+				WinActivate(gShowPanelTitle)
+				return
+
+			}
+			
+			; Toggle
+			; Toggle
+			if gShowPanelVisible {
+
+				; Hide
+				gShowPanel.Hide()
+				gShowPanelVisible := false
+	
+			} else {
+
+				; Show
+				; gShowPanel.Show("AutoSize Center")
+				gShowPanel.Show()
+				gShowPanelVisible := true
+		
+			}
+
 		}
 
 	}
-	
+
+	; ---------- Build the window with 13 buttons ----------
+	BuildPanel() {
+		global gShowPanelVisible
+
+		g := Gui("-MinimizeBox -MaximizeBox", gShowPanelTitle)
+
+		labels := [
+			"Buttons",
+			"Sample Data",
+			"Text Boundaries",
+			"Field Boundaries",
+			"Sliding Objects",
+			"Non-Printing Objects",
+			"Popover Buttons",
+			"Placeholder Text",
+			"Hide Condition",
+			"Conditional Formatting",
+			"Script Triggers",
+			"Quick Find",
+			"Tooltips"
+		]
+
+		colCount := 1
+		marginX := 12, marginY := 12
+		w := 150, h := 36
+		gapX := 10, gapY := 10
+
+		g.MarginX := marginX, g.MarginY := marginY
+		g.SetFont("s10")
+
+		for i, label in labels {
+			row := Ceil(i / colCount)
+			col := Mod(i - 1, colCount) + 1
+			x := marginX + (col - 1) * (w + gapX)
+			y := marginY + (row - 1) * (h + gapY)
+			btn := g.AddButton("x" x " y" y " w" w " h" h, label)
+			btn.OnEvent("Click", ButtonClick.Bind(label))
+		}
+
+		; Close with 'Esc'
+		g.OnEvent("Escape", (*) => g.Hide())
+		; Close with 'X' button
+		g.OnEvent("Close", panelClose)
+		panelClose(thisGui){
+			g.Hide()
+			gShowPanelVisible := false
+		}
+
+		return g
+	}
+
+
+
+	; ---------- Button handler ----------
+	ButtonClick(label, *) {
+		; MsgBox "You clicked: " label
+
+		if(label = "Buttons"){
+			ButtonAction("!vsb")			
+
+		} else if(label = "Sample Data") {
+			ButtonAction("!vss")	
+
+		} else if(label = "Text Boundaries") {
+			ButtonAction("!vst")
+			
+		} else if(label = "Field Boundaries") {
+			ButtonAction("!vsf")
+			
+		} else if(label = "Sliding Objects") {
+			ButtonAction("!vso")
+			
+		} else if(label = "Non-Printing Objects") {
+			ButtonAction("!vsn")
+			
+		} else if(label = "Popover Buttons") {
+			ButtonAction("!vsv")
+			
+		} else if(label = "Placeholder Text") {
+			ButtonAction("!vsl")
+			
+		} else if(label = "Hide Condition") {
+			ButtonAction("!vsh")
+			
+		} else if(label = "Conditional Formatting") {
+			ButtonAction("!vsr")
+			
+		} else if(label = "Script Triggers") {
+			ButtonAction("!vsc")
+			
+		} else if(label = "Quick Find") {
+			ButtonAction("!vsq")
+			
+		} else if(label = "Tooltips") {
+			ButtonAction("!vsp")
+			
+		}
+
+		ButtonAction(shortcut) {
+			WinActivate("ahk_class FMPRO\d\d.0APP$")
+			SendInput shortcut
+		}
+
+	}
+	; ==============================
+
+
 
 #HotIf 
 
