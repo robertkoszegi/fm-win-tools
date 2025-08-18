@@ -26,8 +26,9 @@ Unless otherwise noted below, FileMaker 16+ for Windows should be compatible
 
 ## Release Notes
 ### Badge Panel
-* `Ctrl + Alt + Shift + S` shortcut updated to displaying a panel replresenting options in **View > Show** menu in **layout mode**
-* Known issue: Badge Panel only closes automatically if using the native shortcut for browse mode (Ctrl + B) or custom shortcut defined here (Ctrl + Alt + A). If using other methods to switch to browse mode, the pane needs to be closed manually. 
+* `Ctrl + Alt + Shift + S` shortcut updated to displaying a panel replresenting options in **View > Show** menu in **layout mode**<br>
+** Known behaviour: Badge Panel only closes automatically if using the native shortcut for browse mode (Ctrl + B) or custom shortcut defined here (Ctrl + Alt + A). If using other methods to switch to browse mode, the pane needs to be closed manually. <br>
+* Opening layout from Layout Manager is updated Alt + Enter
 
 ## Shortcuts
 
@@ -85,7 +86,7 @@ Unless otherwise noted below, FileMaker 16+ for Windows should be compatible
 `Ctrl + Shift + B`: Open Debugger (one shortcut for document and script workspace)<br>
 
 ### Layout Manager
-`E`: Open selected layout (E for enter)<br>
+`Alt + Enter`: More intuitive than Alt + O<br>
 <br>
 
 ## History

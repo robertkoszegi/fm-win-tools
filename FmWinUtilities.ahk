@@ -448,7 +448,7 @@ SetTitleMatchMode "Regex"
 #HotIf WinActive("^Manage Layouts.*") 
 
 	; Open selected layout: E
-	e::SendInput "!o"
+	!Enter::SendInput "!o"
 
 #HotIf
 
