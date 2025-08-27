@@ -1,4 +1,4 @@
-# FM Win Tools v2.0
+# FM Win Tools v2.1
 
 An AutoHotkey project to implement a comprehensive set of convenient keyboard shortcuts and functionality fixes for the FileMaker development environment on Windows.<br>
 <br>
@@ -26,9 +26,10 @@ Unless otherwise noted below, FileMaker 16+ for Windows should be compatible
 
 ## Release Notes
 ### Badge Panel
-* `Ctrl + Alt + Shift + S` shortcut updated to displaying a panel replresenting options in **View > Show** menu in **layout mode**<br>
-** Known behaviour: Badge Panel only closes automatically if using the native shortcut for browse mode (Ctrl + B) or custom shortcut defined here (Ctrl + Alt + A). If using other methods to switch to browse mode, the pane needs to be closed manually. <br>
-* Opening layout from Layout Manager is updated Alt + Enter
+* `Ctrl + Alt + Shift + S` updated the Show Badges panel to icon buttons with tooltip
+* Badges panel now disappears when using Ctrl + B or custom shortcut Ctrl + Alt + A. Still the panel does not respond if switching to browse mode using 'Exit Layout' button or the View menu
+
+* Added bullet character to the calculation window shortcuts
 
 ## Shortcuts
 
@@ -69,6 +70,7 @@ Unless otherwise noted below, FileMaker 16+ for Windows should be compatible
 
 #### Special Characters
 `Alt + 7`: Pilcrow character (same as on Mac and it's convenient with "\&" character)<br>
+`Alt + 8`: Bullet character<br>
 `Alt + =`: Not equal sign<br>
 `Alt + ,`: Less than or equal to<br>
 `Alt + .`: Greater or equal to<br>
@@ -90,8 +92,13 @@ Unless otherwise noted below, FileMaker 16+ for Windows should be compatible
 <br>
 
 ## History
+**2.1 - 2025-08-17**<br>
+-Updated Show Badges panel with icons and tooltips<br>
+-Added bullet character to calculation window shortcuts<br>
+
 **2.0 - 2025-08-17**<br>
 -Added Show Badges panel<br>
+-Updated shortcut for opening layout in Manage Layouts<br>
 
 **1.2 - 2025-08-15**<br>
 -Added removal of trailing spaces from highlight when double clicking a word

@@ -1,7 +1,7 @@
 ﻿; #################################################################
 ; AUTHOR: Robert Koszegi
-; DATE: 2025-08-14
-; VERSION: 2.0
+; DATE: 2025-08-26
+; VERSION: 2.1
 ; REQUIREMENTS: 
 ;  - Installation of AutoHotkey v2.0
 ;  - FileMaker 21 Windows (but majority of the features work on any recent FM versions for Windows)
@@ -28,28 +28,12 @@ SetTitleMatchMode "Regex"
 
 #HotIf 
 
-; Test shortcut: Ctrl + Alt + F
-^!f:: {
-
-	; static lastClick := 0
-	; if (A_TickCount - lastClick < 500) {  ; 300 ms threshold
-	; 	MsgBox "Double-click detected!"
-	; }
-	; lastClick := A_TickCount
-
-	global
-	MsgBox gShowPanelVisible
-	; MsgBox IsObject(gShowPanel)
-
-}
-
 
 
 ; View clipboard: Crl + Shift + ?
 ^+/::{
 
-	; MsgBox A_Clipboard
-	MsgBox gShowPanelTitle
+	MsgBox A_Clipboard
 
 }
 ; #################################################################
@@ -62,9 +46,7 @@ SetTitleMatchMode "Regex"
 ; 					DOCUMENT WINDOWS
 ; ==========================================================
 #HotIf WinActive("ahk_class FMPRO\d\d.0APP$")
-	global gShowPanelTitle := "Show Badges"
-
-
+	
 	; Check for Layout Mode
 	IsLayoutMode()
 	{
@@ -121,9 +103,9 @@ SetTitleMatchMode "Regex"
 
 		if( IsLayoutMode() ){
 			
-			if(WinExist(gShowPanelTitle)) {
+			if(WinExist(gBadgePanelTitle)) {
 
-				WinClose(gShowPanelTitle)
+				WinClose(gBadgePanelTitle)
 				
 			}
 			SendInput "^b"
@@ -143,9 +125,9 @@ SetTitleMatchMode "Regex"
 		if( IsLayoutMode() ){
 			
 			; Show Badges panes if open
-			if(WinExist(gShowPanelTitle)) {
+			if(WinExist(gBadgePanelTitle)) {
 
-				WinClose(gShowPanelTitle)
+				WinClose(gBadgePanelTitle)
 				
 			}
 			SendInput "^b"
@@ -216,144 +198,182 @@ SetTitleMatchMode "Regex"
 
 	; ===== Show Badges panel ============================
 	; Ctrl + Shift + Alt + S
-	global gShowPanel := ""
-	global gShowPanelVisible := ""
+	; ================== Config & State ==================
+	global gBadgePanel := ""
+	global gBadgePanelVisible := false
+	global gBadgePanelTitle := "Show Badges"
+
+	badgeIcons := [
+		"button","sample","text","field",
+		"sliding","print","popover","placeholder",
+		"hide","conditional","script","quickfind",
+		"tooltip"
+	]
+
+	badgeTooltips := [
+		"Buttons","Sample Data","Text Boundaries","Field Boundaries",
+		"Sliding Objects","Non-Printing Objects","Popover Buttons","Placeholder Text",
+		"Hide Condition","Conditional Formatting","Script Triggers","Quickfind",
+		"Tooltips"
+	]
+
+	BTN_W := 36, BTN_H := 36          ; button size
+	BMP_W := 32, BMP_H := 32          ; render size for PNG onto button
+
+	; PNG resources & hover tooltip state
+	global gBtnBmps := Map()          ; hwnd -> hBmp (for cleanup)
+	global gBtnTips := Map()          ; hwnd -> tooltip text
+	global gHoverHwnd := 0
+	global gHoverTimerMs := 350
+	global gHoverScheduled := false
 
 	^+!s:: { ; Ctrl+Shift+Alt+S
+		if IsLayoutMode() {                ; assuming you defined this elsewhere
 
-		if( IsLayoutMode() ){
-				
-			global gShowPanel
-			global gShowPanelVisible
-			
-			if !IsObject(gShowPanel) {
+			global gBadgePanel, gBadgePanelVisible
 
-				; Build gui object if doesn't exist
-				gShowPanel := BuildPanel()
+			; FMP acive window position
+			WinGetPos &fmpX, &fmpY,,, "A"
+			badgePanelPosX := fmpX + 950
+			badgePanelPosY := fmpY + 10
 
-			} else if (WinExist(gShowPanelTitle) AND !WinActive(gShowPanelTitle)) {
+			if (!IsObject(gBadgePanel)) {
 
-				; Make window active if not (skip toggling)
-				WinActivate(gShowPanelTitle)
-				return
+				gBadgePanel := BuildBadgePanel()
 
 			}
-			
-			; Toggle
-			; Toggle
-			if gShowPanelVisible {
 
-				; Hide
-				gShowPanel.Hide()
-				gShowPanelVisible := false
-	
+			if gBadgePanelVisible {
+
+				gBadgePanel.Hide()
+				gBadgePanelVisible := false
+				ToolTip() ; hide any active tooltip
+
 			} else {
 
-				; Show
-				; gShowPanel.Show("AutoSize Center")
-				gShowPanel.Show()
-				gShowPanelVisible := true
+				gBadgePanel.Show("x" badgePanelPosX "y" badgePanelPosY ) ; "AutoSize Center"
+				gBadgePanelVisible := true
+
+			}
+		}
+	}
+
+	BuildBadgePanel() {
+		global badgeIcons, badgeTooltips, BTN_W, BTN_H, BMP_W, BMP_H, gBadgePanelTitle
+		global gBtnBmps, gBtnTips
+
+		g := Gui("+AlwaysOnTop -Resize", gBadgePanelTitle)
+		g.MarginX := 12, g.MarginY := 12
+		g.SetFont("s10")
+
+		; layout: 13 columns (single row when room allows)
+		colCount := 13
+		gapX := 8, gapY := 8
+		marginX := g.MarginX, marginY := g.MarginY
+
+		for i, icon in badgeIcons {
+
+			row := Ceil(i / colCount)
+			col := Mod(i - 1, colCount) + 1
+			x := marginX + (col - 1) * (BTN_W + gapX)
+			y := marginY + (row - 1) * (BTN_H + gapY)
+
+			; Bitmap button (no caption). BS_BITMAP = 0x80
+			btn := g.AddButton("x" x " y" y " w" BTN_W " h" BTN_H " +0x80", "")
+			btn.id := icon
+
+			; Load PNG -> HBITMAP and assign to button
+			pngPath := A_ScriptDir "\Icons\" icon "_badge.png"
+			if FileExist(pngPath) {
+
+				hBmp := LoadPicture(pngPath, "w" BMP_W " h" BMP_H " hBitmap")
+				
+				if hBmp {
+
+					; BM_SETIMAGE (0xF7), IMAGE_BITMAP (0)
+					SendMessage 0xF7, 0, hBmp, btn.Hwnd
+					gBtnBmps[btn.Hwnd] := hBmp
+
+				}
+			} else {
+				; Uncomment to debug missing assets:
+				; MsgBox "Missing icon: " pngPath
+			}
+
+			; Store tooltip text for custom hover tooltip system
+			gBtnTips[btn.Hwnd] := badgeTooltips[i]
+
+			btn.OnEvent("Click", BadgeButtonClick)
+		}
+
+		; -- Hover --
+		; Reliable hover tooltips for bitmap buttons
+		OnMessage(0x200, WM_MOUSEMOVE)  ; WM_MOUSEMOVE
 		
+		WM_MOUSEMOVE(wParam, lParam, msg, hwnd) {
+
+			global gBtnTips, gHoverHwnd
+			MouseGetPos ,, &win, &ctrl, 2
+			if (ctrl != gHoverHwnd) {
+
+				gHoverHwnd := ctrl
+				ToolTip()
+				if (gBtnTips.Has(ctrl)) {
+
+					ToolTip gBtnTips[ctrl]
+
+				}
+
 			}
 
 		}
+		; ---
 
-	}
-
-	; ---------- Build the window with 13 buttons ----------
-	BuildPanel() {
-		global gShowPanelVisible
-
-		g := Gui("-MinimizeBox -MaximizeBox", gShowPanelTitle)
-
-		labels := [
-			"Buttons",
-			"Sample Data",
-			"Text Boundaries",
-			"Field Boundaries",
-			"Sliding Objects",
-			"Non-Printing Objects",
-			"Popover Buttons",
-			"Placeholder Text",
-			"Hide Condition",
-			"Conditional Formatting",
-			"Script Triggers",
-			"Quick Find",
-			"Tooltips"
-		]
-
-		colCount := 1
-		marginX := 12, marginY := 12
-		w := 150, h := 36
-		gapX := 10, gapY := 10
-
-		g.MarginX := marginX, g.MarginY := marginY
-		g.SetFont("s10")
-
-		for i, label in labels {
-			row := Ceil(i / colCount)
-			col := Mod(i - 1, colCount) + 1
-			x := marginX + (col - 1) * (w + gapX)
-			y := marginY + (row - 1) * (h + gapY)
-			btn := g.AddButton("x" x " y" y " w" w " h" h, label)
-			btn.OnEvent("Click", ButtonClick.Bind(label))
-		}
-
-		; Close with 'Esc'
-		g.OnEvent("Escape", (*) => g.Hide())
-		; Close with 'X' button
-		g.OnEvent("Close", panelClose)
-		panelClose(thisGui){
-			g.Hide()
-			gShowPanelVisible := false
-		}
-
+		g.OnEvent("Escape", BadgePanel_Hide)
+		g.OnEvent("Close",  BadgePanel_Hide)
 		return g
 	}
 
+	BadgeButtonClick(ctrl, *) {
 
-
-	; ---------- Button handler ----------
-	ButtonClick(label, *) {
-		; MsgBox "You clicked: " label
-
-		if(label = "Buttons"){
+		; MsgBox "Clicked: " gBtnTips[ctrl.Hwnd]
+		if(gBtnTips[ctrl.Hwnd] = "Buttons"){
 			ButtonAction("!vsb")			
 
-		} else if(label = "Sample Data") {
+		} else if(gBtnTips[ctrl.Hwnd] = "Sample Data") {
 			ButtonAction("!vss")	
 
-		} else if(label = "Text Boundaries") {
+		} else if(gBtnTips[ctrl.Hwnd] = "Text Boundaries") {
 			ButtonAction("!vst")
 			
-		} else if(label = "Field Boundaries") {
+		} else if(gBtnTips[ctrl.Hwnd] = "Field Boundaries") {
 			ButtonAction("!vsf")
 			
-		} else if(label = "Sliding Objects") {
+		} else if(gBtnTips[ctrl.Hwnd] = "Sliding Objects") {
 			ButtonAction("!vso")
 			
-		} else if(label = "Non-Printing Objects") {
+		} else if(gBtnTips[ctrl.Hwnd] = "Non-Printing Objects") {
 			ButtonAction("!vsn")
 			
-		} else if(label = "Popover Buttons") {
+		} else if(gBtnTips[ctrl.Hwnd] = "Popover Buttons") {
 			ButtonAction("!vsv")
 			
-		} else if(label = "Placeholder Text") {
+		} else if(gBtnTips[ctrl.Hwnd] = "Placeholder Text") {
 			ButtonAction("!vsl")
 			
-		} else if(label = "Hide Condition") {
+		} else if(gBtnTips[ctrl.Hwnd] = "Hide Condition") {
 			ButtonAction("!vsh")
 			
-		} else if(label = "Conditional Formatting") {
+		} else if(gBtnTips[ctrl.Hwnd] = "Conditional Formatting") {
 			ButtonAction("!vsr")
 			
-		} else if(label = "Script Triggers") {
+		} else if(gBtnTips[ctrl.Hwnd] = "Script Triggers") {
 			ButtonAction("!vsc")
 			
-		} else if(label = "Quick Find") {
+		} else if(gBtnTips[ctrl.Hwnd] = "Quickfind") {
 			ButtonAction("!vsq")
 			
-		} else if(label = "Tooltips") {
+		} else if(gBtnTips[ctrl.Hwnd] = "Tooltips") {
 			ButtonAction("!vsp")
 			
 		}
@@ -364,7 +384,58 @@ SetTitleMatchMode "Regex"
 		}
 
 	}
-	; ==============================
+
+	BadgePanel_Hide(gui, *) {
+
+		global gBadgePanelVisible, gHoverScheduled
+		gBadgePanelVisible := false
+		gHoverScheduled := false
+		ToolTip()              ; hide tooltip immediately
+		gui.Hide()
+
+	}
+
+	; --- Custom hover tooltip logic (works with BS_BITMAP buttons) ---
+	BadgePanel_MouseMove(gui, x, y, *) {
+
+		global gHoverHwnd, gHoverScheduled, gBtnTips
+		MouseGetPos &mx, &my, &winHwnd, &ctrlHwnd, 2
+		if (ctrlHwnd != gHoverHwnd) {
+
+			gHoverHwnd := ctrlHwnd
+			ToolTip()                ; hide current tooltip
+			gHoverScheduled := false
+			if (ctrlHwnd && gBtnTips.Has(ctrlHwnd)) {
+
+				SetTimer(ShowHoverTooltip, -gHoverTimerMs)  ; one-shot delay
+				gHoverScheduled := true
+				
+			}
+
+		}
+
+	}
+
+	ShowHoverTooltip() {
+		global gHoverHwnd, gBtnTips
+		if (!gHoverHwnd)
+			return
+		if gBtnTips.Has(gHoverHwnd) {
+			MouseGetPos &mx, &my
+			ToolTip gBtnTips[gHoverHwnd], mx + 16, my + 16
+		}
+	}
+
+	; Cleanup bitmaps on script exit
+	OnExit(*) {
+		global gBtnBmps
+		for hwnd, hbmp in gBtnBmps {
+			if hbmp
+				DllCall("gdi32\DeleteObject", "ptr", hbmp)
+		}
+		gBtnBmps.Clear()
+		ToolTip()
+	}
 
 
 
@@ -722,6 +793,11 @@ SetTitleMatchMode "Regex"
 	; (this is the same shortcut as it is natively on Mac)
 	!7::{
 		SendInput "¶"
+	}	
+
+	; Bullet: Alt + 8
+	!8::{
+		SendInput "•"
 	}	
 	
 	; Not Equal: Alt + =
